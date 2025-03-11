@@ -26,7 +26,7 @@ def gradual_cpu_load():
     """
     Gradually increases CPU usage from 10% to 90% over 1 hour.
     """
-    load_levels = [10, 20, 30, 50, 60, 70, 80, 90]  # CPU utilization levels
+    load_levels = [10, 20, 30, 40, 50, 60, 70, 80, 90]  # CPU utilization levels
     total_duration = 3600  # 1 hour in seconds
     step_duration = total_duration // len(load_levels)  # Time per step
 
