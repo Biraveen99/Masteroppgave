@@ -24,6 +24,7 @@ def cpu_stress(load_percent, duration):
 
 def plateau_test():
     """
+    RUNDOWN OF THE TEST
     1. 15 min idle (normal)
     2. 30 min at 90% CPU
     3. 15 min idle (normal)
@@ -40,8 +41,7 @@ def plateau_test():
     print("[DEBUG] 30 minutes at 80% CPU load...")
     threads = []
     for _ in range(num_cores):  # One thread per core
-        t = threading.Thread(target=cpu_st
-        ress, args=(90, 30 * 60))
+        t = threading.Thread(target=cpu_stress, args=(90, 30 * 60))
         t.start()
         threads.append(t)
 
