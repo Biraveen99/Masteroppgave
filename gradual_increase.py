@@ -24,7 +24,7 @@ def cpu_stress(load_percent, duration):
 
 def gradual_cpu_load():
     """
-    Gradually increases CPU usage from 10% to 90% over 1 hour.
+    Gradually increases CPU usage from 90% to 10% over 1 hour.
     """
     load_levels = [10, 20, 30, 40, 50, 60, 70, 80, 90]  # CPU utilization levels
     total_duration = 3600  # 1 hour in seconds
