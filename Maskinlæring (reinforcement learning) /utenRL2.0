@@ -1,0 +1,131 @@
+# Generates a Python script that:
+# - Loops over 3 user-defined dataset file paths
+# - Applies all 3 sliding window strategies (fixed, variable, weighted)
+# - Trains separate LSTM models
+# - Plots and saves prediction graphs for each combination
+
+full_script = """
+# ============================================================
+# Sliding Window Strategy Comparison on Multiple Datasets
+# Applies Fixed, Variable, and Weighted windows
+# Trains LSTM model separately for each dataset + strategy
+# Saves plots for each combination
+# ============================================================
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import random
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+import os
+
+# === 1. Define your custom file paths ===
+file_map = {
+    "plateau": "/your/path/to/plateau.csv",
+    "gaussian": "/your/path/to/gaussian.csv",
+    "sinusoidal": "/your/path/to/sinusoidal.csv"
+}
+
+# === 2. Sliding window strategies ===
+def fixed_window(data, idx, size=20):
+    if idx < size: return data[0:idx+1]
+    return data[idx-size+1:idx+1]
+
+def variable_window(data, idx, min_size=10, max_size=30):
+    size = random.randint(min_size, max_size)
+    if idx < size: return data[0:idx+1]
+    return data[idx-size+1:idx+1]
+
+def weighted_window(data, idx, size=20):
+    if idx < size: window = data[0:idx+1]
+    else: window = data[idx-size+1:idx+1]
+    weights = np.linspace(0.1, 1.0, len(window)).reshape(-1, 1)
+    return window * weights
+
+strategy_map = {
+    "Fixed": fixed_window,
+    "Variable": variable_window,
+    "Weighted": weighted_window
+}
+
+# === 3. Define LSTM model ===
+class LSTMModel(nn.Module):
+    def __init__(self, input_size=1, hidden_size=32):
+        super(LSTMModel, self).__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
+        self.fc = nn.Linear(hidden_size, 1)
+
+    def forward(self, x):
+        _, (hn, _) = self.lstm(x)
+        return self.fc(hn[-1])
+
+# === 4. Training function ===
+def train_strategy(data, strategy_fn, episodes=1):
+    model = LSTMModel()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    loss_fn = nn.MSELoss()
+    predictions, actuals = [], []
+
+    for ep in range(episodes):
+        for t in range(30, len(data)-1):
+            window = strategy_fn(data, t)
+            x = torch.tensor(window, dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
+            y_true = torch.tensor(data[t+1], dtype=torch.float32).unsqueeze(0)
+
+            y_pred = model(x)
+            loss = loss_fn(y_pred, y_true)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            predictions.append(y_pred.item())
+            actuals.append(y_true.item())
+
+    return predictions, actuals
+
+# === 5. Main loop: run all strategies on all datasets ===
+for dataset_name, path in file_map.items():
+    if not os.path.exists(path):
+        print(f"File not found: {path}")
+        continue
+
+    # Load and normalize
+    df = pd.read_csv(path)
+    if 'Y' not in df.columns:
+        print(f"Dataset '{dataset_name}' must contain a 'Y' column.")
+        continue
+
+    scaler = MinMaxScaler()
+    normalized = scaler.fit_transform(df[['Y']].values).astype(np.float32)
+
+    for strategy_name, strategy_fn in strategy_map.items():
+        print(f"Running {strategy_name} window on {dataset_name} dataset...")
+        preds, actuals = train_strategy(normalized, strategy_fn)
+
+        # Plot and save
+        plt.figure(figsize=(12, 5))
+        plt.plot(actuals[:300], label='Actual', linewidth=2)
+        plt.plot(preds[:300], label=f'{strategy_name} Prediction')
+        plt.title(f"{strategy_name} Window - {dataset_name.capitalize()} Dataset")
+        plt.xlabel("Time Step")
+        plt.ylabel("Normalized CPU Utilization")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Save plot
+        filename = f"{strategy_name.lower()}_{dataset_name.lower()}_plot.png"
+        plt.savefig(filename)
+        plt.close()
+        print(f"Saved plot to: {filename}")
+"""
+
+# Save to file
+final_script_path = "/mnt/data/multi_dataset_sliding_windows.py"
+with open(final_script_path, "w") as f:
+    f.write(full_script)
+
+final_script_path
