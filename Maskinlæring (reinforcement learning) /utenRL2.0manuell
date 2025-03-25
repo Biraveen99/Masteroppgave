@@ -1,15 +1,15 @@
 # Generates a Python script that:
-# - Loops over 3 user-defined dataset file paths
-# - Applies all 3 sliding window strategies (fixed, variable, weighted)
-# - Trains separate LSTM models
-# - Plots and saves prediction graphs for each combination
+# - Lets user set a single file path
+# - Applies all 3 sliding window strategies to that file
+# - Trains separate LSTM models per strategy
+# - Plots one combined graph comparing the strategies
 
-full_script = """
+script = """
 # ============================================================
-# Sliding Window Strategy Comparison on Multiple Datasets
+# Sliding Window Strategy Comparison on One Selected File
 # Applies Fixed, Variable, and Weighted windows
-# Trains LSTM model separately for each dataset + strategy
-# Saves plots for each combination
+# Trains separate LSTM models
+# Plots one combined graph with predictions vs actual
 # ============================================================
 
 import numpy as np
@@ -21,12 +21,8 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import os
 
-# === 1. Define your custom file paths ===
-file_map = {
-    "plateau": "/your/path/to/plateau.csv",
-    "gaussian": "/your/path/to/gaussian.csv",
-    "sinusoidal": "/your/path/to/sinusoidal.csv"
-}
+# === 1. Set the file path manually ===
+filepath = "/your/path/to/your_dataset.csv"  # <-- Change this!
 
 # === 2. Sliding window strategies ===
 def fixed_window(data, idx, size=20):
@@ -86,46 +82,42 @@ def train_strategy(data, strategy_fn, episodes=1):
 
     return predictions, actuals
 
-# === 5. Main loop: run all strategies on all datasets ===
-for dataset_name, path in file_map.items():
-    if not os.path.exists(path):
-        print(f"File not found: {path}")
-        continue
+# === 5. Main execution ===
+if not os.path.exists(filepath):
+    raise FileNotFoundError(f"File not found: {filepath}")
 
-    # Load and normalize
-    df = pd.read_csv(path)
-    if 'Y' not in df.columns:
-        print(f"Dataset '{dataset_name}' must contain a 'Y' column.")
-        continue
+# Load and normalize data
+df = pd.read_csv(filepath)
+if 'Y' not in df.columns:
+    raise ValueError("Dataset must contain a 'Y' column.")
 
-    scaler = MinMaxScaler()
-    normalized = scaler.fit_transform(df[['Y']].values).astype(np.float32)
+scaler = MinMaxScaler()
+normalized = scaler.fit_transform(df[['Y']].values).astype(np.float32)
 
-    for strategy_name, strategy_fn in strategy_map.items():
-        print(f"Running {strategy_name} window on {dataset_name} dataset...")
-        preds, actuals = train_strategy(normalized, strategy_fn)
+# Run each strategy
+results = {}
+for strategy_name, strategy_fn in strategy_map.items():
+    print(f"Running {strategy_name} window...")
+    preds, actuals = train_strategy(normalized, strategy_fn)
+    results[strategy_name] = preds
 
-        # Plot and save
-        plt.figure(figsize=(12, 5))
-        plt.plot(actuals[:300], label='Actual', linewidth=2)
-        plt.plot(preds[:300], label=f'{strategy_name} Prediction')
-        plt.title(f"{strategy_name} Window - {dataset_name.capitalize()} Dataset")
-        plt.xlabel("Time Step")
-        plt.ylabel("Normalized CPU Utilization")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-
-        # Save plot
-        filename = f"{strategy_name.lower()}_{dataset_name.lower()}_plot.png"
-        plt.savefig(filename)
-        plt.close()
-        print(f"Saved plot to: {filename}")
+# Plot combined results
+plt.figure(figsize=(14, 6))
+plt.plot(actuals[:300], label='Actual', linewidth=2)
+for strategy_name, preds in results.items():
+    plt.plot(preds[:300], label=f"{strategy_name} Prediction")
+plt.title("Sliding Window Comparison")
+plt.xlabel("Time Step")
+plt.ylabel("Normalized CPU Utilization")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 """
 
 # Save to file
-final_script_path = "/mnt/data/multi_dataset_sliding_windows.py"
-with open(final_script_path, "w") as f:
-    f.write(full_script)
+single_file_script_path = "/mnt/data/single_file_sliding_windows.py"
+with open(single_file_script_path, "w") as f:
+    f.write(script)
 
-final_script_path
+single_file_script_path
