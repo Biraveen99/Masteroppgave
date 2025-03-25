@@ -4,7 +4,6 @@
 # - Trains separate LSTM models per strategy
 # - Plots one combined graph comparing the strategies
 
-script = """
 # ============================================================
 # Sliding Window Strategy Comparison on One Selected File
 # Applies Fixed, Variable, and Weighted windows
@@ -22,7 +21,7 @@ import matplotlib.pyplot as plt
 import os
 
 # === 1. Set the file path manually ===
-filepath = "/your/path/to/your_dataset.csv"  # <-- Change this!
+filepath = "/Users/biraveennedunchelian/Documents/Masteroppgave/Masteroppgave/Newest addition/Plateu/plateau_log.csv"  # <-- Change this!
 
 # === 2. Sliding window strategies ===
 def fixed_window(data, idx, size=20):
@@ -113,10 +112,10 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-"""
+
 
 # Save to file
-single_file_script_path = "/mnt/data/single_file_sliding_windows.py"
+single_file_script_path = "/Users/biraveennedunchelian/Documents/Masteroppgave/sliding_windows.py"
 with open(single_file_script_path, "w") as f:
     f.write(script)
 
