@@ -1,5 +1,6 @@
 # Regenerate the fully commented version of the adaptive_all.py script
 
+full_script = """
 # ============================================================
 # Adaptive Sliding Window + LSTM + RL Model
 # Lets user choose dataset: plateau, gaussian, or sinusoidal
