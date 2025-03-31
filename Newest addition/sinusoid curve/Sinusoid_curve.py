@@ -14,7 +14,7 @@ log_file_path = os.path.join(save_dir, "sinusoidal_log.csv")
 plot_file_path = os.path.join(save_dir, "sinusoidal_plot.png")
 
 # definerer x  aksen fra 0 til 3600
-x = np.linspace(0, 3600, 1000)
+x = np.linspace(0, 3600, 3600)
 
 # definerer y aksen og mekker en sinus kurce
 y = 50 + 40 * np.sin((2 * np.pi / 1800) * x)  # for å få 2 peaks

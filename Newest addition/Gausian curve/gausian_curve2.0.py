@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.stats import norm
 
 # Definerer x-aksen
-x = np.linspace(0, 3600, 1000)
+x = np.linspace(0, 3600, 3600)
 
 # Define mean and standard deviation for Gaussian curve
 mean = 1800  # midten av kurven
